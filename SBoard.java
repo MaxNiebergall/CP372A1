@@ -14,8 +14,8 @@ public class SBoard {
 	public static ArrayList<Note> notes = new ArrayList<Note>();
 
 	public static void main(String[] args) throws Exception {
-		// TODO Auto-generated method stub
-		client.GUI gui = new client.GUI();
+
+		//client.GUI gui = new client.GUI();
 		portNumber = Integer.parseInt(args[0]);
 		boardWidth = Integer.parseInt(args[1]);
 		gui.verifyXCoord(boardWidth);
@@ -38,7 +38,7 @@ public class SBoard {
 
 	private static class Client extends Thread {
 		private Socket socket;
-		private client.GUI gui;
+		//private client.GUI gui;
 
 		public Client(Socket socket, int w, int h, ArrayList<String> colours, client.GUI gui) {
 			this.socket = socket;
@@ -70,7 +70,36 @@ public class SBoard {
 				// capitalized
 				while (true) {
 					String input = in.readLine();
+					// from client "POST xCoord=" + x + ", yCoord=" + y + ", width=" + w + ", height=" + h + ", refersTo=" + message
 
+					if(input.startsWith("POST")){
+						int x=0, y=0, w=0, h=0;
+						String message="";
+						int index = input.indexOf("xCoord=") + "xCoord=".length();
+						while(input.charAt(index) != ','){
+							x = 10*x + input.charAt(index)-'0';
+							index++;
+						}
+						index = input.indexOf("yCoord=") + "yCoord=".length();
+						while(input.charAt(index) != ','){
+							y = 10*y + input.charAt(index)-'0';
+							index++;
+						}
+						index = input.indexOf("width=") + "width=".length();
+						while(input.charAt(index) != ','){
+							w = 10*w + input.charAt(index)-'0';
+							index++;
+						}
+						index = input.indexOf("height=") + "height=".length();
+						while(input.charAt(index) != ','){
+							h = 10*h + input.charAt(index)-'0';
+							index++;
+						}
+						
+						String[] messages = input.split("refersTo=");
+						message=messages[1];
+
+					}
 				}
 			} catch (IOException e) {
 				// log("Error handling client# " + clientNumber + ": " + e);

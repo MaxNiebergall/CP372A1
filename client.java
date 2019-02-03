@@ -302,7 +302,7 @@ public class client {
 		void post(int x, int y, int w, int h, String message) {
 
 			if (this.socket != null) {
-				out.println("xCoord=" + x + "yCoord=" + y + "width=" + w + "height=" + h + "refersTo=" + message);
+				out.println("POST xCoord=" + x + ", yCoord=" + y + ", width=" + w + ", height=" + h + ", refersTo=" + message);
 
 			}
 		}
