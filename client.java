@@ -82,16 +82,16 @@ public class client {
             JTextField yCoordP = new JTextField();
             JTextField xCoordP = new JTextField();
 
-            JLabel yCoordLabelPo = new JLabel("Y Coordinate:");
-            JLabel xCoordLabelPo = new JLabel("X Coordinate:");
-            JTextField yCoordPo = new JTextField();
-            JTextField xCoordPo = new JTextField();
-            JLabel widthLabelPo = new JLabel("Width:");
-            JTextField width = new JTextField();
-            JLabel heightLabelPo = new JLabel("Height:");
-            JTextField height = new JTextField();
-            JLabel colrLabelPo = new JLabel("Color:");
-            JComboBox colorComboBoxPo = new JComboBox();
+			JLabel yCoordLabelPo = new JLabel("Y Coordinate:");
+			JLabel xCoordLabelPo = new JLabel("X Coordinate:");
+			JTextField yCoordPo = new JTextField();
+			JTextField xCoordPo = new JTextField();
+			JLabel widthLabelPo = new JLabel("Width:");
+			JTextField width = new JTextField();
+			JLabel heightLabelPo = new JLabel("Height:");
+			JTextField height = new JTextField();
+			JLabel colrLabelPo = new JLabel("Color:");
+			JComboBox<String> colorComboBoxPo = new JComboBox<String>();
 
             postOptionsPanel.add(xCoordLabelPo);
             postOptionsPanel.add(xCoordPo);
