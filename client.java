@@ -2,7 +2,6 @@ import static javax.swing.JOptionPane.OK_CANCEL_OPTION;
 
 import java.awt.Color;
 import java.awt.GridLayout;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
@@ -45,7 +44,7 @@ public class client {
 		public JTextField portNum = new JTextField("9898");
 		public JButton connectDisconect = new JButton("Connect");
 
-		public JTextArea textArea = new JTextArea("message here");
+		public JTextArea messageArea = new JTextArea("message here");
 		public JButton post = new JButton("Post");
 		public JPanel postOptionsPanel = new JPanel();
 
@@ -73,7 +72,7 @@ public class client {
 			JLabel refersToLabel = new JLabel("Contains Message: ");
 			JLabel yCoordLabel = new JLabel("Y Coordinate: ");
 			JLabel xCoordLabel = new JLabel("X Coordinate: ");
-			JTextField colorText = new JTextField();
+			//JTextField colorText = new JTextField();
 			JTextField refersToText = new JTextField();
 			JTextField yCoord = new JTextField();
 			JTextField xCoord = new JTextField();
@@ -149,32 +148,29 @@ public class client {
 						while (notFound) {
 							int result = JOptionPane.showConfirmDialog(frame, getOptionsPanel, "Get Properties",
 									OK_CANCEL_OPTION);
-							if (result == OK_CANCEL_OPTION || result == JOptionPane.CLOSED_OPTION) {
+							if (result == JOptionPane.CANCEL_OPTION || result == JOptionPane.CLOSED_OPTION) {
 								break;
 							}
 							try {
-								color = colorText.getText();
-								refersTo = refersToText.getText();
-								int y = -1, x = -1, w = -1, h = -1;
+								color = (String) colorComboBoxG.getSelectedItem();
+                                refersTo = refersToText.getText();
+								int y = -1, x = -1;
 								if (!yCoord.getText().equals("")) {
 									y = Integer.parseInt(yCoord.getText());
 								}
 								if (!xCoord.getText().equals("")) {
 									x = Integer.parseInt(xCoord.getText());
 								}
-								if (!width.getText().equals("")) {
-									w = Integer.parseInt(width.getText());
-								}
-								if (!height.getText().equals("")) {
-									h = Integer.parseInt(height.getText());
-								}
-								contains = new Point(x, y);
+
 								notFound = false;
-								get(x, y, w, h, textArea.getText());
+								get(x, y, refersTo, color);
 
 								// Retrieve results
 								String line = in.readLine();
 								resultArea.setText(line);
+
+								frame.validate();
+								frame.repaint();
 
 							} catch (NumberFormatException nfe) {
 								yCoordLabel.setText("Y Coordinate (Integer)");
@@ -204,6 +200,7 @@ public class client {
 							colorComboBoxPo.removeAllItems();
 							connect(IP, port);
 							connectDisconect.setText("Disconnect");
+                            colorComboBoxG.addItem("None");
 							colorComboBoxG.addItem("Default");
 							colorComboBoxPo.addItem("Default");
 							for (int i = 0; i < colors.size(); i++) {
@@ -235,7 +232,7 @@ public class client {
 						while (notFound) {
 							int result = JOptionPane.showConfirmDialog(frame, postOptionsPanel, "Post Properties",
 									OK_CANCEL_OPTION);
-							if (result == OK_CANCEL_OPTION || result == JOptionPane.CLOSED_OPTION) {
+							if (result == JOptionPane.CANCEL_OPTION || result == JOptionPane.CLOSED_OPTION) {
 								break;
 							}
 							try {
@@ -244,12 +241,12 @@ public class client {
 								// false = x and y are not valid, true = x and y are valid raise an error here
 								boolean valid = (verifyXCoord(x) == false && verifyYCoord(y) == false) ? false : true;
 								int w = Integer.parseInt(width.getText()), h = Integer.parseInt(height.getText());
-								contains = new Point(x, y);
+
 								notFound = false;
 								if (color.equals("Default")) {
-									post(x, y, w, h, textArea.getText());
+									post(x, y, w, h, messageArea.getText());
 								} else {
-									post(x, y, w, h, textArea.getText(), color);
+									post(x, y, w, h, messageArea.getText(), color);
 								}
 
 							} catch (NumberFormatException nfe) {
@@ -275,7 +272,7 @@ public class client {
 						while (notFound) {
 							int result = JOptionPane.showConfirmDialog(frame, pinOptionsPanel, "Pin Location",
 									OK_CANCEL_OPTION);
-							if (result == OK_CANCEL_OPTION || result == JOptionPane.CLOSED_OPTION) {
+							if (result == JOptionPane.CANCEL_OPTION|| result == JOptionPane.CLOSED_OPTION) {
 								break;
 							}
 							try {
@@ -305,7 +302,7 @@ public class client {
 						while (notFound) {
 							int result = JOptionPane.showConfirmDialog(frame, unpinOptionsPanel, "Unpin Location",
 									OK_CANCEL_OPTION);
-							if (result == OK_CANCEL_OPTION || result == JOptionPane.CLOSED_OPTION) {
+							if (result == JOptionPane.CANCEL_OPTION || result == JOptionPane.CLOSED_OPTION) {
 								break;
 							}
 							try {
@@ -333,7 +330,7 @@ public class client {
 			connectPanel.add(IPAddress);
 			connectPanel.add(portNum);
 			connectPanel.add(connectDisconect);
-			messagePanel.add(textArea);
+			messagePanel.add(messageArea);
 			messagePanel.add(post);
 
 			basePanel.setLayout(new GridLayout(2, 2));
@@ -434,8 +431,11 @@ public class client {
 			}
 		}
 
-		void get(int x, int y, int w, int h, String message) {
+		void get(int x, int y, String message, String color) {
 			String toSend = "GET ";
+			if(!color.equals("None")){
+			    toSend += "color=" + color;
+            }
 
 			if (x >= 0) {
 				toSend += "xCoord=" + x;
@@ -443,18 +443,13 @@ public class client {
 			if (y >= 0) {
 				toSend += ", yCoord=" + y;
 			}
-			if (w >= 0) {
-				toSend += ", width" + w;
-			}
-			if (h >= 0) {
-				toSend += ", height" + h;
-			}
+
 			if (message.length() > 0) {
 				toSend += ", refersTo=" + message;
 			}
 
 			out.println(toSend);
-
+            System.out.println(toSend);
 		}
 
 	}
