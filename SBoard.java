@@ -43,6 +43,7 @@ public class SBoard {
 
 		public Client(Socket socket, int w, int h, List<String> colours) {
 			this.socket = socket;
+			System.out.println("HELLO");
 		}
 
 		@Override
@@ -51,7 +52,7 @@ public class SBoard {
 
 				BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-				out.println("Connection successful. Width: " + boardWidth + " Height: " + boardHeight);
+
 				out.println(colours.toString());
 				// for (int i = 0; i < colours.size(); i++) {
 				// out.println(colours.get(i).toString() + "\n");
@@ -64,6 +65,7 @@ public class SBoard {
 					String message = null;
 					try {
 						message = requestType(input);
+						System.out.println(message);
 					} catch (Exception e) {
 						// some
 					}
@@ -125,13 +127,17 @@ public class SBoard {
 			if (index == -1) {
 				colour = colours.get(0);
 			} else {
-				String[] colorArr = input.split("color=");
-				colour = colorArr[1];
+				while (input.charAt(index) != ',') {
+					colour += input.charAt(index);
+					index++;
+				}
 			}
+			System.out.println();
 			Note newNote = new Note(x, y, w, h, colour, message);
 			String[] messages = input.split("refersTo=");
 			message = messages[1];
 
+			log("New Note");
 			synchronized (notes) {
 				notes.add(newNote);
 			}
