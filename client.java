@@ -49,6 +49,7 @@ public class client {
 		public JPanel postOptionsPanel = new JPanel();
 
 		public JButton get = new JButton("Get");
+		public JButton getPins = new JButton("Get pins");
 		public JPanel getOptionsPanel = new JPanel();
 		public JButton pin = new JButton("Pin");
 		public JButton unpin = new JButton("Unpin");
@@ -57,7 +58,7 @@ public class client {
 		public InetAddress IP;
 		public int port;
 		public Socket socket;
-		private String defaultColor;
+
 		BufferedReader in; // server response
 		PrintWriter out; // to send data use print writer
 		public ArrayList<String> colors = new ArrayList<String>();
@@ -72,11 +73,10 @@ public class client {
 			JLabel refersToLabel = new JLabel("Contains Message: ");
 			JLabel yCoordLabel = new JLabel("Y Coordinate: ");
 			JLabel xCoordLabel = new JLabel("X Coordinate: ");
-			//JTextField colorText = new JTextField();
+			// JTextField colorText = new JTextField();
 			JTextField refersToText = new JTextField();
 			JTextField yCoord = new JTextField();
 			JTextField xCoord = new JTextField();
-			JButton getPins = new JButton("GET PINS");
 			JComboBox<String> colorComboBoxG = new JComboBox<String>();
 
 			JLabel yCoordLabelP = new JLabel("Y Coordinate: ");
@@ -130,7 +130,6 @@ public class client {
 			getOptionsPanel.setLayout(new GridLayout());
 			getOptionsPanel.setSize(100, 50);
 
-			getOptionsPanel.add(getPins);
 			getOptionsPanel.add(colorLabel);
 			getOptionsPanel.add(colorComboBoxG);
 			getOptionsPanel.add(refersToLabel);
@@ -146,27 +145,26 @@ public class client {
 					if (connectDisconect.getText().equals("Connect")) {
 						JOptionPane.showMessageDialog(frame, "Must connect first");
 					} else {
-						try{
-								get();
+						try {
+							get();
 
-								// Retrieve results
-								String line = in.readLine();
-								resultArea.setText(line);
+							// Retrieve results
+							String line = in.readLine();
+							resultArea.setText(line);
 
-								frame.validate();
-								frame.repaint();
+							frame.validate();
+							frame.repaint();
 
-							} catch (NumberFormatException nfe) {
-								yCoordLabel.setText("Y Coordinate (Integer)");
-								xCoordLabel.setText("X Coordinate (Integer)");
-							} catch (Exception ee) {
-								ee.printStackTrace();
-							}
+						} catch (NumberFormatException nfe) {
+							yCoordLabel.setText("Y Coordinate (Integer)");
+							xCoordLabel.setText("X Coordinate (Integer)");
+						} catch (Exception ee) {
+							ee.printStackTrace();
 						}
 					}
+				}
 
 			});
-
 
 			get.addActionListener(new ActionListener() {
 				@Override
@@ -183,7 +181,7 @@ public class client {
 							}
 							try {
 								color = (String) colorComboBoxG.getSelectedItem();
-                                refersTo = refersToText.getText();
+								refersTo = refersToText.getText();
 								int y = -1, x = -1;
 								if (!yCoord.getText().equals("")) {
 									y = Integer.parseInt(yCoord.getText());
@@ -230,7 +228,7 @@ public class client {
 							colorComboBoxPo.removeAllItems();
 							connect(IP, port);
 							connectDisconect.setText("Disconnect");
-                            colorComboBoxG.addItem("None");
+							colorComboBoxG.addItem("None");
 							colorComboBoxG.addItem("Default");
 							colorComboBoxPo.addItem("Default");
 							for (int i = 0; i < colors.size(); i++) {
@@ -279,7 +277,7 @@ public class client {
 									post(x, y, w, h, messageArea.getText(), color);
 								}
 
-								String line=in.readLine();
+								String line = in.readLine();
 								JOptionPane.showMessageDialog(frame, line);
 
 							} catch (NumberFormatException nfe) {
@@ -305,7 +303,7 @@ public class client {
 						while (notFound) {
 							int result = JOptionPane.showConfirmDialog(frame, pinOptionsPanel, "Pin Location",
 									OK_CANCEL_OPTION);
-							if (result == JOptionPane.CANCEL_OPTION|| result == JOptionPane.CLOSED_OPTION) {
+							if (result == JOptionPane.CANCEL_OPTION || result == JOptionPane.CLOSED_OPTION) {
 								break;
 							}
 							try {
@@ -339,8 +337,8 @@ public class client {
 								break;
 							}
 							try {
-
 								int y = Integer.parseInt(yCoordP.getText()), x = Integer.parseInt(xCoordP.getText());
+
 								unpin(x, y);
 								notFound = false;
 
@@ -366,12 +364,14 @@ public class client {
 			messagePanel.add(messageArea);
 			messagePanel.add(post);
 
-			basePanel.setLayout(new GridLayout(2, 2));
+			basePanel.setLayout(new GridLayout(4, 1));
+
 			basePanel.add(connectPanel);
 			basePanel.add(messagePanel);
 			buttonPanel.add(get);
 			buttonPanel.add(pin);
 			buttonPanel.add(unpin);
+			buttonPanel.add(getPins);
 			basePanel.add(buttonPanel);
 			basePanel.add(resultArea);
 
@@ -454,7 +454,7 @@ public class client {
 				out.println("POST xCoord=" + x + ", yCoord=" + y + ", width=" + w + ", height=" + h + ", refersTo="
 						+ message);
 			}
-			// add this note to what the client sees
+
 		}
 
 		void post(int x, int y, int w, int h, String message, String color) {
@@ -466,9 +466,9 @@ public class client {
 
 		void get(int x, int y, String message, String color) {
 			String toSend = "GET ";
-			if(!color.equals("None")){
-			    toSend += "color=" + color;
-            }
+			if (!color.equals("None")) {
+				toSend += "color=" + color;
+			}
 
 			if (x >= 0) {
 				toSend += "xCoord=" + x;
@@ -482,13 +482,12 @@ public class client {
 			}
 
 			out.println(toSend);
-            System.out.println(toSend);
+//			System.out.println(toSend);
 		}
 
-	void get() {
-		out.println("GET PINS");
-	}
-
+		void get() {
+			out.println("GET PINS");
+		}
 
 	}
 
