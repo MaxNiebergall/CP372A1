@@ -76,6 +76,7 @@ public class client {
 			JTextField refersToText = new JTextField();
 			JTextField yCoord = new JTextField();
 			JTextField xCoord = new JTextField();
+			JButton getPins = new JButton("GET PINS");
 			JComboBox<String> colorComboBoxG = new JComboBox<String>();
 
 			JLabel yCoordLabelP = new JLabel("Y Coordinate: ");
@@ -129,6 +130,7 @@ public class client {
 			getOptionsPanel.setLayout(new GridLayout());
 			getOptionsPanel.setSize(100, 50);
 
+			getOptionsPanel.add(getPins);
 			getOptionsPanel.add(colorLabel);
 			getOptionsPanel.add(colorComboBoxG);
 			getOptionsPanel.add(refersToLabel);
@@ -137,6 +139,34 @@ public class client {
 			getOptionsPanel.add(yCoord);
 			getOptionsPanel.add(xCoordLabel);
 			getOptionsPanel.add(xCoord);
+
+			getPins.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					if (connectDisconect.getText().equals("Connect")) {
+						JOptionPane.showMessageDialog(frame, "Must connect first");
+					} else {
+						try{
+								get();
+
+								// Retrieve results
+								String line = in.readLine();
+								resultArea.setText(line);
+
+								frame.validate();
+								frame.repaint();
+
+							} catch (NumberFormatException nfe) {
+								yCoordLabel.setText("Y Coordinate (Integer)");
+								xCoordLabel.setText("X Coordinate (Integer)");
+							} catch (Exception ee) {
+								ee.printStackTrace();
+							}
+						}
+					}
+
+			});
+
 
 			get.addActionListener(new ActionListener() {
 				@Override
@@ -248,6 +278,9 @@ public class client {
 								} else {
 									post(x, y, w, h, messageArea.getText(), color);
 								}
+
+								String line=in.readLine();
+								JOptionPane.showMessageDialog(frame, line);
 
 							} catch (NumberFormatException nfe) {
 								yCoordLabelPo.setText("Y Coordinate (Integer)");
@@ -451,6 +484,11 @@ public class client {
 			out.println(toSend);
             System.out.println(toSend);
 		}
+
+	void get() {
+		out.println("GET PINS");
+	}
+
 
 	}
 

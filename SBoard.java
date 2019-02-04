@@ -15,7 +15,9 @@ public class SBoard {
     public static ArrayList<String> colors = new ArrayList<String>();
     public static List<Note> notes = Collections.synchronizedList(new ArrayList<Note>());
 
-    public static void main(String[] args) throws Exception {
+
+
+    public static void main(String[] args) {
         try {
             portNumber = Integer.parseInt(args[0]);
             boardWidth = Integer.parseInt(args[1]);
@@ -28,14 +30,18 @@ public class SBoard {
             System.out.println("Bad values in command line");
             System.exit(0);
         }
-
-        ServerSocket listener = new ServerSocket(portNumber);
         try {
-            while (true) {
-                new Client(listener.accept()).start();
+            ServerSocket listener = new ServerSocket(portNumber);
+
+            try {
+                while (true) {
+                    new Client(listener.accept()).start();
+                }
+            } finally {
+                listener.close();
             }
-        } finally {
-            listener.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -99,17 +105,31 @@ public class SBoard {
             if (input != null) {
 
                 if (input.startsWith("GET")) {
-                    output="RESULTS:";
-                    log("GET");
-                    List<Note> results = searchNotes(input);
+                    if (input.startsWith("GET PINS")) {
 
-                    for (int i = 0; i < results.size(); i++) {
-                        output += "" + results.get(i).toString() + "   ";
+                        for (int i = 0; i < .size(); i++) {
+                            output += "" + results.get(i).toString() + "   ";
+                        }
+                    } else {
+                        output = "RESULTS:";
+                        log("GET");
+                        List<Note> results = searchNotes(input);
+
+                        for (int i = 0; i < results.size(); i++) {
+                            output += "" + results.get(i).toString() + "   ";
+                        }
+                        log(output);
                     }
-                    log(output);
                 } else if (input.startsWith("POST")) {
                     log("POST");
-                    postNote(input);
+                    try {
+                        postNote(input);
+                        output = "POST SUCCESS";
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        output = "POST ERROR Note doesnt fit on board. Board Height: " + boardHeight + " board width: " + boardWidth;
+                    }
+
                 } else if (input.startsWith("PIN")) {
                     log("PIN");
                     pinLocation(input, 0);
@@ -132,7 +152,7 @@ public class SBoard {
             return output;
         }
 
-        private void postNote(String input) {
+        private void postNote(String input) throws Exception {
             log(input);
             String message = "", color = "";
             int[] xyCoords = parseXY(input);
@@ -140,6 +160,9 @@ public class SBoard {
             int x = xyCoords[0], y = xyCoords[1];
             int w = wh[0], h = wh[1];
             // parse the string and set it to each variable
+            if (x + w > boardWidth || y + h > boardHeight || x < 0 || w < 0 || y < 0 || h < 0) {
+                throw new Exception();
+            }
             int index = input.indexOf("color=");
             if (index == -1) {
                 color = defaultcolor;
