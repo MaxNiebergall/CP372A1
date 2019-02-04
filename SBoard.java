@@ -314,111 +314,37 @@ public class SBoard {
 				}
 			} else {
 				for (Note note : notes) {
-					results.add(note);
-				}
-				if (color.equals("")) {
-					if (message.equals("")) {
-						if (x == -1) {
-							if (y == -1) {
-								// do nothing
-							} else if (y != -1) {
-								for (Note note : results) {
-									if (note.getYCoord() + note.getHeight() <= 0) {
-										results.remove(note);
-									}
-								}
-							}
-						} else if (x != -1) {
-							if (y == -1) {
-								for (Note note : results) {
-									if (note.getXCoord() + note.getWidth() <= 0) {
-										results.remove(note);
-									}
-								}
-							} else if (y != -1) {
-								for (Note note : results) {
-									if (note.getXCoord() + note.getWidth() <= 0
-											&& note.getYCoord() + note.getHeight() <= 0) {
-										results.remove(note);
-									}
-								}
-							}
-						}
-					} else if (!message.equals("")) {
-						if (x == -1) {
-							if (y == -1) {
-
-							} else if (y != -1) {
-
-							}
-						} else if (x != -1) {
-							if (y == -1) {
-
-							} else if (y != -1) {
-
-							}
-						}
-					}
-				} else if (!color.equals("")) {
-					if (message.equals("")) {
-						if (x == -1) {
-							if (y == -1) {
-
-							} else if (y != -1) {
-
-							}
-						} else if (x != -1) {
-							if (y == -1) {
-
-							} else if (y != -1) {
-
-							}
-						}
-					} else if (!message.equals("")) {
-						if (x == -1) {
-							if (y == -1) {
-
-							} else if (y != -1) {
-
-							}
-						} else if (x != -1) {
-							if (y == -1) {
-
-							} else if (y != -1) {
-
-							}
-						}
-					}
-				}
+                    results.add(note);
+                }
 				if (color.length() > 0) {
 					for (int i = 0; i < notes.size(); i++) {
-						if (notes.get(i).color.equals(color) && !results.contains(notes.get(i))) {
-							results.add(notes.get(i));
+						if ((!notes.get(i).color.equals(color) && results.contains(notes.get(i)))) {
+							results.remove(notes.get(i));
 						}
 					}
 				}
 
 				if (x >= 0) {
 					for (int i = 0; i < notes.size(); i++) {
-						if (notes.get(i).xcoord < x && notes.get(i).xcoord + notes.get(i).width > x
-								&& !results.contains(notes.get(i))) {
-							results.add(notes.get(i));
+						if ((notes.get(i).xcoord > x || notes.get(i).xcoord + notes.get(i).width < x)
+								&& results.contains(notes.get(i))) {
+							results.remove(notes.get(i));
 						}
 					}
 				}
 				if (y >= 0) {
 					for (int i = 0; i < notes.size(); i++) {
-						if (notes.get(i).ycoord < y && notes.get(i).ycoord + notes.get(i).height > y
-								&& !results.contains(notes.get(i))) {
-							results.add(notes.get(i));
+						if ((notes.get(i).ycoord > y || notes.get(i).ycoord + notes.get(i).height < y)
+								&& results.contains(notes.get(i))) {
+							results.remove(notes.get(i));
 						}
 					}
 				}
 
 				if (message.length() > 0) {
 					for (int i = 0; i < notes.size(); i++) {
-						if (notes.get(i).refersTo.contains(message) && !results.contains(notes.get(i))) {
-							results.add(notes.get(i));
+						if (!notes.get(i).refersTo.contains(message) && results.contains(notes.get(i))) {
+							results.remove(notes.get(i));
 						}
 					}
 				}
