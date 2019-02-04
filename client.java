@@ -88,7 +88,7 @@ public class client {
 			JLabel heightLabelPo = new JLabel("Height:");
 			JTextField height = new JTextField();
 			JLabel colrLabelPo = new JLabel("Color:");
-			JComboBox colorComboBoxPo = new JComboBox();
+			JComboBox<String> colorComboBoxPo = new JComboBox<String>();
 
 			postOptionsPanel.add(xCoordLabelPo);
 			postOptionsPanel.add(xCoordPo);
