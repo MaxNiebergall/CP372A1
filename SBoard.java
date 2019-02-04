@@ -63,6 +63,8 @@ public class SBoard {
 				BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
+				out.println(colours.toString());
+
 				// Send a welcome message to the client.
 				// out.println("Hello, you are client #" + clientNumber + ".");
 				// out.println("Enter a line with only a period to quit\n");
