@@ -23,6 +23,10 @@ import javax.swing.JTextField;
 
 public class client {
 
+    public static void main(String[] args){
+        GUI gui = new GUI();
+    }
+
 	public static class GUI {
 		// Swing:
 		public JFrame frame = new JFrame();
@@ -36,7 +40,7 @@ public class client {
 		// public JTextField IPAddress = new JTextField("IP Address");
 		public JTextField IPAddress = new JTextField("localhost");
 		// public JTextField portNum = new JTextField("Port Number");
-		public JTextField portNum = new JTextField("4554");
+		public JTextField portNum = new JTextField("9898");
 		public JButton connectDisconect = new JButton("Connect");
 
 		public JTextArea textArea = new JTextArea("message here");
@@ -164,6 +168,7 @@ public class client {
 							JOptionPane.showMessageDialog(frame, "Port number is not a number");
 						} catch (Exception ex) {
 							JOptionPane.showMessageDialog(frame, "an exception occured");
+							ex.printStackTrace();
 						}
 					}
 				}
@@ -187,10 +192,12 @@ public class client {
 							int w = Integer.parseInt(width.getText()), h = Integer.parseInt(height.getText());
 							contains = new Point(x, y);
 							notFound = false;
-							if (color.equals("")) {
+							//if (color.equals("")) {
 								post(x, y, w, h, textArea.getText());
 
-							}
+							//}
+
+
 						} catch (NumberFormatException nfe) {
 							yCoordLabelPo.setText("Y Coordinate (Integer)");
 							xCoordLabelPo.setText("X Coordinate (Integer)");
@@ -279,6 +286,7 @@ public class client {
 			this.socket = new Socket(IP, portnumber);
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			out = new PrintWriter(socket.getOutputStream(), true);
+
 		}
 
 		void diconnect() {

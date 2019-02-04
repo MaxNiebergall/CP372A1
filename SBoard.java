@@ -13,23 +13,24 @@ public class SBoard {
 	public static ArrayList<String> colours = new ArrayList<String>();
 	public static ArrayList<Note> notes = new ArrayList<Note>();
 
+	//TODO dont through exception here - handle it
 	public static void main(String[] args) throws Exception {
 
 		//client.GUI gui = new client.GUI();
 		portNumber = Integer.parseInt(args[0]);
 		boardWidth = Integer.parseInt(args[1]);
-		gui.verifyXCoord(boardWidth);
+		//gui.verifyXCoord(boardWidth);
 		boardHeight = Integer.parseInt(args[2]);
-		gui.verifyYCoord(boardHeight);
+		//gui.verifyYCoord(boardHeight);
 		defaultColour = args[3];
 		for (int i = 3; i < args.length; i++) {
 			colours.add(args[i]);
 		}
-		gui.setDefaultColor(defaultColour);
+		//gui.setDefaultColor(defaultColour);
 		ServerSocket listener = new ServerSocket(portNumber);
 		try {
 			while (true) {
-				new Client(listener.accept(), boardWidth, boardHeight, colours, gui).start();
+				new Client(listener.accept()).start();
 			}
 		} finally {
 			listener.close();
@@ -40,15 +41,15 @@ public class SBoard {
 		private Socket socket;
 		//private client.GUI gui;
 
-		public Client(Socket socket, int w, int h, ArrayList<String> colours, client.GUI gui) {
+		public Client(Socket socket) {
 			this.socket = socket;
-			this.gui = gui;
-			this.gui.resultArea.append("Client successful connection. \nWidth: " + Integer.toString(w) + " Height: "
-					+ Integer.toString(h) + "\n");
-			this.gui.resultArea.append("The colours are: \n");
-			for (String colour : colours) {
-				this.gui.resultArea.append(colour + "\n");
-			}
+
+//			this.gui.resultArea.append("Client successful connection. \nWidth: " + Integer.toString(w) + " Height: "
+//					+ Integer.toString(h) + "\n");
+//			this.gui.resultArea.append("The colours are: \n");
+//			for (String colour : colours) {
+//				this.gui.resultArea.append(colour + "\n");
+//			}
 		}
 
 		@Override
@@ -99,6 +100,9 @@ public class SBoard {
 						String[] messages = input.split("refersTo=");
 						message=messages[1];
 
+						log("New Note");
+						notes.add(new Note(x,y,w,h, null, false, message));
+						log(notes.get(notes.size()-1).toString());
 					}
 				}
 			} catch (IOException e) {
@@ -118,7 +122,7 @@ public class SBoard {
 		}
 	}
 
-	public class Note implements Comparable {
+	public static class Note implements Comparable {
 		int xcoord, ycoord, width, height;
 		String colour, refersTo;
 		boolean isPinned;
@@ -128,7 +132,7 @@ public class SBoard {
 			this.ycoord = ycoord;
 			this.width = width;
 			this.height = height;
-			if (colour.equals(null)) {
+			if (colour == null) {
 				this.colour = defaultColour;
 			}
 		}
@@ -138,6 +142,10 @@ public class SBoard {
 		public int compareTo(Object arg0) {
 			// TODO Auto-generated method stub
 			return 0;
+		}
+
+		public String toString(){
+			return "" + this.ycoord + this.xcoord + this.width + this.height + this.colour;
 		}
 	}
 
