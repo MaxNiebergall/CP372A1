@@ -1,3 +1,5 @@
+import java.awt.*;
+import java.awt.geom.Point2D;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,11 +11,12 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-public class SBoard {
+public class Server {
 	public static String defaultcolor;
 	public static int boardWidth, boardHeight, portNumber = 8000;
 	public static ArrayList<String> colors = new ArrayList<String>();
 	public static List<Note> notes = Collections.synchronizedList(new ArrayList<Note>());
+	public static List<MyPoint> pins = Collections.synchronizedList(new ArrayList<MyPoint>());
 
 	public static void main(String[] args) {
 		try {
@@ -40,6 +43,16 @@ public class SBoard {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+
+	private static class MyPoint extends Point{
+		MyPoint(int x, int y){
+			super(x,y);
+		}
+
+		public String toString(){
+			return " x: " + (int) this.getX() + " y: " + (int) this.getY();
 		}
 	}
 
@@ -83,14 +96,14 @@ public class SBoard {
 //					out.println(message);
 				}
 			} catch (IOException e) {
-				// log("Error handling client# " + clientNumber + ": " + e);
+				// log("Error handling Client# " + clientNumber + ": " + e);
 			} finally {
 				try {
 					socket.close();
 				} catch (IOException e) {
 					log("Couldn't close a socket, what's going on?");
 				}
-				// log("Connection with client# " + clientNumber + " closed");
+				// log("Connection with Client# " + clientNumber + " closed");
 			}
 		}
 
@@ -105,14 +118,14 @@ public class SBoard {
 				if (input.startsWith("GET")) {
 					if (input.startsWith("GET PINS")) {
 						output = "RESULTS:";
-						List<Note> results = searchNotes(input, true);
-						for (int i = 0; i < results.size(); i++) {
-							output += "" + results.get(i).toString() + "   ";
+
+						for (int i = 0; i < pins.size(); i++) {
+							output += "" + pins.get(i).toString() + "   ";
 						}
 					} else {
 						output = "RESULTS:";
 						log("GET");
-						List<Note> results = searchNotes(input, false);
+						List<Note> results = searchNotes(input);
 
 						for (int i = 0; i < results.size(); i++) {
 							output += "" + results.get(i).toString() + "   ";
@@ -132,13 +145,14 @@ public class SBoard {
 
 				} else if (input.startsWith("PIN")) {
 					log("PIN");
-					pinLocation(input, 0);
+					output = pinLocation(input, 0);
 				} else if (input.startsWith("UNPIN")) {
 					log("UNPIN");
-					pinLocation(input, 1);
+					output = pinLocation(input, 1);
 				} else if (input.startsWith("CLEAR")) {
 					log("CLEAR");
-					clear();
+					output = clear();
+
 				} else if (input.startsWith("DISCONNECT")) {
 					log("DISCONNECT");
 					disconnect();
@@ -185,37 +199,49 @@ public class SBoard {
 
 		}
 
-		private void pinLocation(String input, int type) {
+		private String pinLocation(String input, int type) {
 			// parse the input
 			int[] xyCoords = parseXY(input);
 			int x = xyCoords[0], y = xyCoords[1];
+			synchronized (pins){
+				pins.add(new MyPoint(x,y));
+			}
 
 			synchronized (notes) {
 				for (Note note : notes) {
 					if (note.getXCoord() <= x && (x <= note.getXCoord() + note.getWidth())) {
-
 						if (y >= note.getYCoord() && (y <= note.getYCoord() + note.getHeight())) {
 							if (type == 0) {
-
-								note.setPinStatus(true);
+								note.pinNote(x, y);
+								return "PIN SUCCESS";
 							} else {
-								note.setPinStatus(false);
+								try {
+									if (note.isPinned && note.getPin().getX() == x && note.getPin().getY() == y) {
+										note.unpinNote(x, y);
+									}else{
+										return "PINNING ERROR - 1";
+									}
+								}catch(Exception e){
+									e.printStackTrace();
+								}
+
 							}
 						}
 					}
 				}
 			}
-
+			return "PINNING ERROR - 1";
 		}
 
-		private void clear() {
+		private String clear() {
 			synchronized (notes) {
-				for (Note note : notes) {
-					if (note.getStatus()) {
-						note.setPinStatus(false);
+				for(int i=0; i<notes.size(); i++) {
+					if (!notes.get(i).isPinned()) {
+						notes.remove(notes.get(i));
 					}
 				}
 			}
+			return "CLEAR SUCCESS";
 		}
 
 		private void disconnect() throws Exception {
@@ -276,7 +302,8 @@ public class SBoard {
 			return wh;
 		}
 
-		List<Note> searchNotes(String input, boolean getPins) {
+
+		List<Note> searchNotes(String input) {
 			LinkedList<Note> results = new LinkedList<Note>();
 
 			String message = "";
@@ -306,13 +333,7 @@ public class SBoard {
 			System.out.println("color = " + color);
 			System.out.println("x = " + x);
 			System.out.println("y = " + y);
-			if (getPins) {
-				for (Note note : notes) {
-					if (note.getStatus() == getPins) {
-						results.add(note);
-					}
-				}
-			} else {
+
 				for (Note note : notes) {
                     results.add(note);
                 }
@@ -348,7 +369,7 @@ public class SBoard {
 						}
 					}
 				}
-			}
+
 
 			return results;
 
@@ -360,6 +381,7 @@ public class SBoard {
 		private int xcoord, ycoord, width, height;
 		private String color, refersTo;
 		private boolean isPinned = false;
+		private int pinedAtX, pinedAtY;
 
 		public Note(int xcoord, int ycoord, int width, int height, String color, String refersTo) {
 			this.xcoord = xcoord;
@@ -370,8 +392,28 @@ public class SBoard {
 			this.refersTo = refersTo;
 		}
 
-		public void setPinStatus(boolean value) {
-			this.isPinned = value;
+		public void pinNote(int pinX, int pinY) {
+			this.pinedAtX=pinX;
+			this.pinedAtY=pinY;
+			this.isPinned = true;
+		}
+
+
+		public void unpinNote(int pinX, int pinY)throws Exception {
+			if(this.isPinned && pinX==this.pinedAtX && pinY == this.pinedAtY){
+			this.isPinned = false;}
+			else {
+				throw new Exception();
+			}
+		}
+
+		public Point2D getPin() throws Exception{
+			if(this.isPinned){
+				return new Point(pinedAtX, pinedAtY);
+			}
+			else{
+				throw new Exception();
+			}
 		}
 
 		public int getXCoord() {
@@ -394,7 +436,7 @@ public class SBoard {
 			return this.color;
 		}
 
-		public boolean getStatus() {
+		public boolean isPinned() {
 			return this.isPinned;
 		}
 
