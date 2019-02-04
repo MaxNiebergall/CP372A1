@@ -23,6 +23,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 public class client {
+	public static boolean show = true;
 
 	public static void main(String[] args) {
 		GUI gui = new GUI();
@@ -35,7 +36,7 @@ public class client {
 		public JPanel connectPanel = new JPanel();
 		public JPanel messagePanel = new JPanel();
 		public JPanel buttonPanel = new JPanel();
-
+		public JPanel unpinOptionsPanel = new JPanel();
 		public JPanel pinOptionsPanel = new JPanel();
 
 		// public JTextField IPAddress = new JTextField("IP Address");
@@ -50,7 +51,8 @@ public class client {
 
 		public JButton get = new JButton("Get");
 		public JPanel getOptionsPanel = new JPanel();
-		public JButton pinUnpin = new JButton("Pin");
+		public JButton pin = new JButton("Pin");
+		public JButton unpin = new JButton("Unpin");
 
 		public JTextArea resultArea = new JTextArea();
 		public InetAddress IP;
@@ -67,28 +69,33 @@ public class client {
 			// TODO HANDLE RESPONSES
 			// TODO update documentation to describe the way we are returning notes after
 			// GET request.
-			JLabel colorLabel = new JLabel("Color:");
-			JLabel refersToLabel = new JLabel("Contains Message:");
-			JLabel yCoordLabel = new JLabel("Y Coordinate:");
-			JLabel xCoordLabel = new JLabel("X Coordinate:");
+			JLabel colorLabel = new JLabel("Color: ");
+			JLabel refersToLabel = new JLabel("Contains Message: ");
+			JLabel yCoordLabel = new JLabel("Y Coordinate: ");
+			JLabel xCoordLabel = new JLabel("X Coordinate: ");
 			JTextField colorText = new JTextField();
 			JTextField refersToText = new JTextField();
 			JTextField yCoord = new JTextField();
 			JTextField xCoord = new JTextField();
 			JComboBox<String> colorComboBoxG = new JComboBox<String>();
 
-			JLabel yCoordLabelP = new JLabel("Y Coordinate:");
-			JLabel xCoordLabelP = new JLabel("X Coordinate:");
+			JLabel yCoordLabelP = new JLabel("Y Coordinate: ");
+			JLabel xCoordLabelP = new JLabel("X Coordinate: ");
 			JTextField yCoordP = new JTextField();
 			JTextField xCoordP = new JTextField();
 
-			JLabel yCoordLabelPo = new JLabel("Y Coordinate:");
-			JLabel xCoordLabelPo = new JLabel("X Coordinate:");
+			JLabel yCoordLabeluP = new JLabel("Y Coordinate: ");
+			JLabel xCoordLabeluP = new JLabel("X Coordinate: ");
+			JTextField yCoorduP = new JTextField();
+			JTextField xCoorduP = new JTextField();
+
+			JLabel yCoordLabelPo = new JLabel("Y Coordinate: ");
+			JLabel xCoordLabelPo = new JLabel("X Coordinate: ");
 			JTextField yCoordPo = new JTextField();
 			JTextField xCoordPo = new JTextField();
-			JLabel widthLabelPo = new JLabel("Width:");
+			JLabel widthLabelPo = new JLabel("Width: ");
 			JTextField width = new JTextField();
-			JLabel heightLabelPo = new JLabel("Height:");
+			JLabel heightLabelPo = new JLabel("Height: ");
 			JTextField height = new JTextField();
 			JLabel colrLabelPo = new JLabel("Color:");
 			JComboBox<String> colorComboBoxPo = new JComboBox<String>();
@@ -112,6 +119,13 @@ public class client {
 			pinOptionsPanel.add(yCoordP);
 			pinOptionsPanel.setLayout(new GridLayout());
 			pinOptionsPanel.setSize(100, 50);
+
+			unpinOptionsPanel.add(xCoordLabeluP);
+			unpinOptionsPanel.add(xCoorduP);
+			unpinOptionsPanel.add(yCoordLabeluP);
+			unpinOptionsPanel.add(yCoorduP);
+			unpinOptionsPanel.setLayout(new GridLayout());
+			unpinOptionsPanel.setSize(100, 50);
 
 			getOptionsPanel.setLayout(new GridLayout());
 			getOptionsPanel.setSize(100, 50);
@@ -159,17 +173,8 @@ public class client {
 								get(x, y, w, h, textArea.getText());
 
 								// Retrieve results
-								resultArea.setText("");
-								String line;
-								int numLines;
-								while ((line = in.readLine().strip()).length() <= 0)
-									;
-								numLines = Integer.parseInt(line);
-
-								while (!(line = in.readLine()).equals("")) {
-									// for(int i=0; i<=numLines; i++){
-									resultArea.append(line + "\n");
-								}
+								String line = in.readLine();
+								resultArea.setText(line);
 
 							} catch (NumberFormatException nfe) {
 								yCoordLabel.setText("Y Coordinate (Integer)");
@@ -188,14 +193,17 @@ public class client {
 
 					if (connectDisconect.getText() == "Disconnect") {
 						diconnect();
+						colorComboBoxG.removeAllItems();
+						colorComboBoxPo.removeAllItems();
 						connectDisconect.setText("Connect");
 					} else {
 						try {
 							IP = InetAddress.getByName(IPAddress.getText());
 							port = Integer.parseInt(portNum.getText());
+							colorComboBoxG.removeAllItems();
+							colorComboBoxPo.removeAllItems();
 							connect(IP, port);
 							connectDisconect.setText("Disconnect");
-
 							colorComboBoxG.addItem("Default");
 							colorComboBoxPo.addItem("Default");
 							for (int i = 0; i < colors.size(); i++) {
@@ -256,7 +264,7 @@ public class client {
 				}
 			});
 
-			pinUnpin.addActionListener(new ActionListener() {
+			pin.addActionListener(new ActionListener() {
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
@@ -286,6 +294,36 @@ public class client {
 					}
 				}
 			});
+			unpin.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					if (connectDisconect.getText().equals("Connect")) {
+						JOptionPane.showMessageDialog(frame, "Must connect first");
+					} else {
+						boolean notFound = true;
+						while (notFound) {
+							int result = JOptionPane.showConfirmDialog(frame, unpinOptionsPanel, "Unpin Location",
+									OK_CANCEL_OPTION);
+							if (result == OK_CANCEL_OPTION || result == JOptionPane.CLOSED_OPTION) {
+								break;
+							}
+							try {
+
+								int y = Integer.parseInt(yCoordP.getText()), x = Integer.parseInt(xCoordP.getText());
+								unpin(x, y);
+								notFound = false;
+
+							} catch (NumberFormatException nfe) {
+								yCoordLabelP.setText("Y Coordinate (Integer)");
+								xCoordLabelP.setText("X Coordinate (Integer)");
+							} catch (Exception ee) {
+								ee.printStackTrace();
+							}
+						}
+					}
+				}
+			});
 
 			resultArea.setBackground(new Color(0xFFFFFF));
 			resultArea.setSize(200, 300);
@@ -298,11 +336,12 @@ public class client {
 			messagePanel.add(textArea);
 			messagePanel.add(post);
 
-			basePanel.setLayout(new GridLayout(2, 1));
+			basePanel.setLayout(new GridLayout(2, 2));
 			basePanel.add(connectPanel);
 			basePanel.add(messagePanel);
 			buttonPanel.add(get);
-			buttonPanel.add(pinUnpin);
+			buttonPanel.add(pin);
+			buttonPanel.add(unpin);
 			basePanel.add(buttonPanel);
 			basePanel.add(resultArea);
 
@@ -342,16 +381,21 @@ public class client {
 			this.socket = new Socket(IP, portnumber);
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			out = new PrintWriter(socket.getOutputStream(), true);
-
-			String colorsStr = in.readLine();
-			String[] colorsArr = colorsStr.split(" ");
-			for (int i = 0; i < colorsArr.length; i++) {
-				colors.add(colorsArr[i]);
+			if (show) {
+				String colorsStr = in.readLine();
+				String[] colorsArr = colorsStr.split(" ");
+				for (int i = 0; i < colorsArr.length; i++) {
+					colors.add(colorsArr[i]);
+				}
+				show = false;
 			}
+
 		}
 
 		void diconnect() {
-
+			if (this.socket != null) {
+				out.println("DISCONNECT ");
+			}
 		}
 
 		void clear() {
