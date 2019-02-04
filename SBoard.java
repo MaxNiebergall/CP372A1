@@ -66,18 +66,15 @@ public class SBoard {
 					String message = null;
 					try {
 						message = requestType(input);
-						int numLines = 0;
-						for (int i = 0; i < message.length(); i++) {
-							if (message.charAt(i) == '\n') {
-								numLines++;
-							}
-						}
-						out.println(numLines);
+
+						System.out.println("THIS IS THE MESSAGE " + message);
+//						out.println(numLines);
+
 						out.println(message);
 					} catch (Exception e) {
-						// some
+						e.printStackTrace();
 					}
-					out.println(message);
+//					out.println(message);
 				}
 			} catch (IOException e) {
 				// log("Error handling client# " + clientNumber + ": " + e);
@@ -104,7 +101,7 @@ public class SBoard {
 					List<Note> results = searchNotes(input);
 
 					for (int i = 0; i < results.size(); i++) {
-						output += "" + results.get(i).toString() + "\n";
+						output += "" + results.get(i).toString() + "   ";
 					}
 					log(output);
 				} else if (input.startsWith("POST")) {
@@ -133,15 +130,14 @@ public class SBoard {
 		}
 
 		private void postNote(String input) {
+			log(input);
 			String message = "", color = "";
 			int[] xyCoords = parseXY(input);
 			int[] wh = parseWH(input);
 			int x = xyCoords[0], y = xyCoords[1];
 			int w = wh[0], h = wh[1];
 			// parse the string and set it to each variable
-//			System.out.println(input);
 			int index = input.indexOf("color=");
-//			System.out.println(index);
 			if (index == -1) {
 				color = colors.get(0);
 			} else {
@@ -151,24 +147,15 @@ public class SBoard {
 					index++;
 				}
 			}
-//			System.out.println(x);
-//			System.out.println(y);
-//			System.out.println(w);
-//			System.out.println(h);
-			System.out.println("color: " + color);
 
 			String[] messages = input.split("refersTo=");
 			message = messages[1];
-			Note newNote = new Note(x, y, w, h, color, message);
-//			System.out.println(message);
+
 			log("New Note");
 			synchronized (notes) {
-				notes.add(newNote);
+				notes.add(new Note(x, y, w, h, color, message));
 			}
 			log(notes.get(notes.size() - 1).toString());
-//			for (Note note : notes) {
-//				System.out.println("POSTING " + note.toString());
-//			}
 
 		}
 
@@ -192,9 +179,6 @@ public class SBoard {
 					}
 				}
 			}
-			for (Note note : notes) {
-				System.out.println("THINGY " + note.toString());
-			}
 
 		}
 
@@ -205,9 +189,6 @@ public class SBoard {
 						note.setPinStatus(false);
 					}
 				}
-			}
-			for (Note note : notes) {
-				System.out.println("THINGY " + note.toString());
 			}
 		}
 
@@ -387,8 +368,8 @@ public class SBoard {
 		@Override
 		public String toString() {
 			return "xCoord=" + this.xcoord + ", yCoord=" + this.ycoord + ", width=" + this.width + ", height="
-					+ this.height + ", color=" + this.color + ", refersTo=" + this.refersTo + ", isPinned="
-					+ this.isPinned;
+					+ this.height + ", color=" + this.color + ", isPinned=" + this.isPinned + ", refersTo="
+					+ this.refersTo;
 		}
 	}
 
