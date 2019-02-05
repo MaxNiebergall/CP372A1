@@ -212,6 +212,14 @@ public class Client {
 
                     if (connectDisconect.getText() == "Disconnect") {
                         diconnect();
+                        try {
+                            in.close();
+                            out.close();
+                            socket.close();
+
+                        }catch (Exception ee){
+                            ee.printStackTrace();
+                        }
                         colorComboBoxG.removeAllItems();
                         colorComboBoxPo.removeAllItems();
                         connectDisconect.setText("Connect");
@@ -435,19 +443,19 @@ public class Client {
             this.socket = new Socket(IP, portnumber);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new PrintWriter(socket.getOutputStream(), true);
-            if (show) {
+
                 String colorsStr = in.readLine();
                 String[] colorsArr = colorsStr.split(" ");
                 for (int i = 0; i < colorsArr.length; i++) {
                     colors.add(colorsArr[i]);
                 }
-                show = false;
-            }
+
 
         }
 
         void diconnect() {
             if (this.socket != null) {
+                colors.clear();
                 out.println("DISCONNECT ");
             }
         }
