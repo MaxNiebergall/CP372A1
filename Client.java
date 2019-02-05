@@ -262,18 +262,22 @@ public class Client {
                                 color = (String) colorComboBoxPo.getSelectedItem();
                                 int y = Integer.parseInt(yCoordPo.getText()), x = Integer.parseInt(xCoordPo.getText());
                                 // false = x and y are not valid, true = x and y are valid raise an error here
-                                boolean valid = (verifyXCoord(x) == false && verifyYCoord(y) == false) ? false : true;
                                 int w = Integer.parseInt(width.getText()), h = Integer.parseInt(height.getText());
-
-                                notFound = false;
-                                if (color.equals("Default")) {
-                                    post(x, y, w, h, messageArea.getText());
+                                
+                                if (verifyXCoord(x) && verifyYCoord(y) && verifyWH(w) && verifyWH(h)) {
+                                    
+                                    if (color.equals("Default")) {
+                                        post(x, y, w, h, messageArea.getText());
+                                    } else {
+                                        post(x, y, w, h, messageArea.getText(), color);
+                                    }
+                                    notFound = false;
+                                    String line = in.readLine();
+                                    JOptionPane.showMessageDialog(frame, line);
                                 } else {
-                                    post(x, y, w, h, messageArea.getText(), color);
+                                    JOptionPane.showMessageDialog(frame, "Invalid requirements");
                                 }
-
-                                String line = in.readLine();
-                                JOptionPane.showMessageDialog(frame, line);
+                                
 
                             } catch (NumberFormatException nfe) {
                                 yCoordLabelPo.setText("Y Coordinate (Integer)");
@@ -334,15 +338,15 @@ public class Client {
                                 break;
                             }
                             try {
-                                int y = Integer.parseInt(yCoordP.getText()), x = Integer.parseInt(xCoordP.getText());
+                                int y = Integer.parseInt(yCoorduP.getText()), x = Integer.parseInt(xCoorduP.getText());
 
                                 unpin(x, y);
                                 notFound = false;
 
                                 JOptionPane.showMessageDialog(frame, in.readLine());
                             } catch (NumberFormatException nfe) {
-                                yCoordLabelP.setText("Y Coordinate (Integer)");
-                                xCoordLabelP.setText("X Coordinate (Integer)");
+                                yCoordLabeluP.setText("Y Coordinate (Integer)");
+                                xCoordLabeluP.setText("X Coordinate (Integer)");
                             } catch (Exception ee) {
                                 ee.printStackTrace();
                             }
@@ -409,6 +413,9 @@ public class Client {
 
         boolean verifyYCoord(int y) {
             return ((y >= 0) ? true : false);
+        }
+        boolean verifyWH(int num) {
+            return ((num > 0) ? true : false);
         }
 
         boolean verifyColor(ArrayList<String> colors, String color) {
@@ -497,7 +504,7 @@ public class Client {
             }
 
             out.println(toSend);
-//			System.out.println(toSend);
+
         }
 
         void get() {

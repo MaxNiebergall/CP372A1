@@ -84,7 +84,7 @@ public class Server {
 					try {
 						message = requestType(input);
 
-						System.out.println("THIS IS THE MESSAGE:" + message);
+						
 //						out.println(numLines);
 
 						if (message.length() > 0) {
@@ -117,23 +117,28 @@ public class Server {
 
 				if (input.startsWith("GET")) {
 					if (input.startsWith("GET PINS")) {
-						output = "RESULTS:";
+						output = "RESULTS: ";
 
 						for (int i = 0; i < pins.size(); i++) {
-							output += "" + pins.get(i).toString() + "   ";
+							output += "" + pins.get(i).toString() + "  ||  ";
+						}
+						for (Note note : notes) {
+							if (note.isPinned()) {
+								System.out.println(note.toString());
+							}
 						}
 					} else {
-						output = "RESULTS:";
+						output = "RESULTS: ";
 						log("GET");
 						List<Note> results = searchNotes(input);
 
 						for (int i = 0; i < results.size(); i++) {
-							output += "" + results.get(i).toString() + "   ";
+							output += "" + results.get(i).toString() + "  ||  ";
 						}
 						log(output);
 					}
 				} else if (input.startsWith("POST")) {
-					log("POST");
+					// log("POST");
 					try {
 						postNote(input);
 						output = "POST SUCCESS";
@@ -191,35 +196,76 @@ public class Server {
 			String[] messages = input.split("refersTo=");
 			message = messages[1];
 
-			log("New Note");
+			// log("New Note");
 			synchronized (notes) {
 				notes.add(new Note(x, y, w, h, color, message));
 			}
-			log(notes.get(notes.size() - 1).toString());
+			// log(notes.get(notes.size() - 1).toString());
 
 		}
 
 		private String pinLocation(String input, int type) {
 			// parse the input
+			if (notes.size() == 0) {
+				return "PIN/UNPIN ERROR - NO NOTES";
+			}
+			int num_times = 0;
 			int[] xyCoords = parseXY(input);
 			int x = xyCoords[0], y = xyCoords[1];
-			synchronized (pins){
-				pins.add(new MyPoint(x,y));
+			if ( type == 0) {
+				synchronized (pins){
+					pins.add(new MyPoint(x,y));
+				}
+			} else {
+				// System.out.println(input);
+				boolean passed = false;
+				
+				synchronized (pins){
+					int size = pins.size();
+					for (int i = 0; i < pins.size(); i++) {
+						if (pins.get(i).getX() == x && pins.get(i).getY() == y) {
+							
+							if (passed == false) {
+								pins.remove(i);
+							}
+							passed = true;
+							
+						}
+					}
+					for (int i = 0; i< pins.size(); i++) {
+						if (pins.get(i).getX() == x && pins.get(i).getY() == y) {
+							num_times+=1;
+						}
+					}
+					
+				}
+				if (passed == false) {
+					return "UNPINNING ERROR - NO SUCH PIN WITH COORDS";
+				}
 			}
 
+			String result = "PINNING ERROR - UNSUCCESSFUL PIN";
+
 			synchronized (notes) {
+
 				for (Note note : notes) {
 					if (note.getXCoord() <= x && (x <= note.getXCoord() + note.getWidth())) {
 						if (y >= note.getYCoord() && (y <= note.getYCoord() + note.getHeight())) {
 							if (type == 0) {
+								
 								note.pinNote(x, y);
-								return "PIN SUCCESS";
+								result = "PIN SUCCESS";
 							} else {
 								try {
-									if (note.isPinned && note.getPin().getX() == x && note.getPin().getY() == y) {
-										note.unpinNote(x, y);
+									if (note.isPinned() && note.getPin().getX() == x && note.getPin().getY() == y) {
+										
+										if (num_times ==0) {
+											note.unpinNote(x, y);
+										}
+										
+										result = "UNPIN SUCCESS";
 									}else{
-										return "PINNING ERROR - 1";
+										return "UNPINNING ERROR - NOT WITHIN BOUNDS";
 									}
 								}catch(Exception e){
 									e.printStackTrace();
@@ -230,7 +276,19 @@ public class Server {
 					}
 				}
 			}
-			return "PINNING ERROR - 1";
+			if (result.equalsIgnoreCase("PINNING ERROR - UNSUCCESSFUL PIN")) {
+				synchronized (pins){
+					for (int i = 0; i < pins.size(); i++) {
+						if (pins.get(i).getX() == x && pins.get(i).getY() == y) {
+							pins.remove(i);
+							break;
+						
+						}
+					}
+					
+				}
+			}
+			return result;
 		}
 
 		private String clear() {
@@ -328,12 +386,6 @@ public class Server {
 				}
 			}
 
-			System.out.println(input);
-			System.out.println("message =" + message);
-			System.out.println("color = " + color);
-			System.out.println("x = " + x);
-			System.out.println("y = " + y);
-
 				for (Note note : notes) {
                     results.add(note);
                 }
@@ -415,7 +467,9 @@ public class Server {
 				throw new Exception();
 			}
 		}
-
+		public String getDesc() {
+			return this.refersTo;
+		}
 		public int getXCoord() {
 			return this.xcoord;
 		}
